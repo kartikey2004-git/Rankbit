@@ -31,10 +31,10 @@ export default async function RootLayout({ children }) {
         {!session && <LoginScreen />}
 
         {session && (
-          <>
+          <div className="max-w-4xl mx-auto ">
             <Header />
             {children}
-          </>
+          </div>
         )}
       </body>
     </html>
