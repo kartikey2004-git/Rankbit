@@ -12,7 +12,7 @@ const Header = async () => {
   return (
     <header className="max-w-4xl mx-auto my-6 flex items-center justify-between px-4">
       <a
-        href=""
+        href="/"
          className="text-4xl font-bold bg-gradient-to-r from-indigo-700 to-blue-500 text-transparent bg-clip-text tracking-tight"
       >
         Rank Tracker
