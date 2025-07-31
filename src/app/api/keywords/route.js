@@ -71,3 +71,17 @@ export async function GET(req) {
     });
   }
 }
+
+export async function DELETE(req) {
+  await mongoose.connect(process.env.MONGODB_URI);
+
+  const { searchParams } = new URL(req.url);
+  const keyword = searchParams.get("keyword");
+  const domain = searchParams.get("domain");
+
+  const session = await getServerSession(authOptions);
+
+  await Keyword.deleteOne({ domain, keyword, owner: session.user?.email });
+
+  return Response.json(true);
+}

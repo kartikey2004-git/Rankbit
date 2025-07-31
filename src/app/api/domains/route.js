@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 import axios from "axios";
 import * as cheerio from "cheerio";
-import { NextResponse } from "next/server";
+import { Keyword } from "@/models/Keywords";
 
 async function getIconUrl(domain) {
   try {
@@ -69,9 +69,16 @@ export async function GET() {
 
   const session = await getServerSession(authOptions);
 
-  const user = await Domain.find({ owner: session.user?.email });
+  const email = session.user?.email;
 
-  return Response.json(user);
+  const domains = await Domain.find({ owner: email });
+
+  const keywords = await Keyword.find({
+    owner: email,
+    domain: domains.map((doc) => doc.domain),
+  });
+
+  return Response.json({domains,keywords});
 }
 
 export async function DELETE(req) {
@@ -84,5 +91,5 @@ export async function DELETE(req) {
 
   await Domain.deleteOne({ owner: session.user?.email, domain: domain });
 
-  return Response.json(true)
+  return Response.json(true);
 }

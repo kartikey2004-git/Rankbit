@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import DoubleHeader from "./DoubleHeader";
 import DomainRow from "./DomainRow";
-import axios from "axios";
 
-const DomainsList =  ({domains}) => {
+const DomainsList =  ({domains,keywords}) => {
   
   return (
     <div>
@@ -14,8 +13,12 @@ const DomainsList =  ({domains}) => {
         mainTitle={domains.length + " Domains"}
       />
 
-      {domains.map((domain, i) => (
-        <DomainRow key={i} {...domain} />
+      {domains.map((domainDoc, i) => (
+        <DomainRow 
+        key={i} 
+        {...domainDoc} 
+        keywords={keywords.filter(k => k.domain === domainDoc.domain)}
+        />
       ))}
     </div>
   );

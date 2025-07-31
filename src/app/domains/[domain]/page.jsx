@@ -76,7 +76,11 @@ const page = ({ params }) => {
   return (
     <>
       <div className="flex items-center justify-between">
-        <DoubleHeader preTitle="Domains »" mainTitle={domain} />
+        <DoubleHeader 
+        preTitle="Domains »" 
+        mainTitle={domain} 
+        preTitleLink={"/"}
+        />
 
         <button
           title="Delete domain"
@@ -96,6 +100,10 @@ const page = ({ params }) => {
         keywords.map((keywordObj) => (
           <KeywordRow key={keywordObj._id} {...keywordObj} />
         ))
+      )}
+
+      {!loading && !keywords?.length && (
+        <div>No Keywords found:</div>
       )}
     </>
   );
