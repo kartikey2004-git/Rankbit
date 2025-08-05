@@ -2,12 +2,15 @@ import { Keyword } from "@/models/Keywords";
 import mongoose from "mongoose";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
+import { doGooglesearch } from "@/lib/rankingFunction";
+import { Result } from "@/models/Results";
 
 export async function POST(req) {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
 
     const session = await getServerSession(authOptions);
+
     if (!session?.user?.email) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -22,15 +25,28 @@ export async function POST(req) {
       });
     }
 
-    const created = await Keyword.create({
+    await Keyword.create({
       keyword,
       domain,
-      owner: session.user.email,
+      owner: session?.user?.email || "anonymous",
     });
 
-    return new Response(JSON.stringify(created), {
-      status: 201,
+    const responseId = await doGooglesearch(keyword);
+
+    if (!responseId) {
+      return Response.json(
+        { error: "BrightData search failed" },
+        { status: 500 }
+      );
+    }
+
+    const result = await Result.create({
+      keyword,
+      domain,
+      brightDataResponseId: responseId,
     });
+
+    return new Response({ status: 201 });
   } catch (error) {
     console.error("Keyword creation error:", error.message);
     return new Response(JSON.stringify({ error: "Internal Server Error" }), {
