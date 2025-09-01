@@ -1,7 +1,7 @@
 import Link from "next/link";
 import React from "react";
 
-const DomainRow = ({ owner, domain, icon, keywords }) => {
+const DomainRow = ({ domain, icon, keywords }) => {
   return (
     <div className="flex items-center justify-between gap-4 p-4 rounded-xl bg-white border border-blue-200 shadow-sm my-4">
       <div className="flex items-start gap-3 flex-1">
@@ -19,7 +19,7 @@ const DomainRow = ({ owner, domain, icon, keywords }) => {
             {keywords.map((keywordDoc, i) => (
               <>
                 <Link
-                  href={'/domains/' + domain + '/' + keywordDoc.keyword}
+                  href={"/domains/" + domain + "/" + keywordDoc.keyword}
                   key={i}
                   className="bg-gray-100 text-gray-700 px-2 py-1 rounded-md text-sm font-medium"
                 >
@@ -37,3 +37,12 @@ const DomainRow = ({ owner, domain, icon, keywords }) => {
 };
 
 export default DomainRow;
+
+
+/*
+
+JSON.parse() : Converts a JSON string → JavaScript object.
+
+JSON.stringify() : Converts a JavaScript object → JSON string.
+
+*/

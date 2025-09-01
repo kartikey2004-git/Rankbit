@@ -8,16 +8,43 @@ import { Keyword } from "@/models/Keywords";
 
 async function getIconUrl(domain) {
   try {
+    // get response from particular domain
     const response = await axios.get(`https://${domain}`);
+
+    // console.log(response): raw HTML string you got back from an HTTP request
+
+    // Cheerio is a Node.js library that lets you work with HTML/XML using a jQuery-like API.
+
+    // Think of it like: you load an HTML document → then you can select, traverse(access each element within a structure) and manipulate elements easily.
+
+    // cheerio.load(html) → takes that HTML string and parses it into a DOM-like structure in memory.
+
+    // $ → becomes your jQuery-style selector function.
+
+    // response.data ka HTML tumne cheerio ko diya, aur ab $ ke through tum uss HTML me se elements nikal sakte ho.
+
     const $ = cheerio.load(response.data);
+
+    // finds the <link> tag in the HTML whose rel attribute contains "icon" (like favicon links)  and stores its href value (the icon URL) in the variable href
 
     let href = $("link[rel*='icon']").attr("href");
 
+    // checks if no favicon link (href) was found ,it falls back to a default favicon URL at https://<domain>/favicon.ico.
+
     if (!href) return `https://${domain}/favicon.ico`;
 
+    // checks if the favicon URL (href) already starts with "http" . If yes, it simply returns that URL.
+
     if (href.startsWith("http")) return href;
+
+    // handles protocol-relative URLs (like //example.com/favicon.ico).If href starts with //, it prepends https: to make it a complete URL.
+
     if (href.startsWith("//")) return `https:${href}`;
+
+    // checks if the favicon path starts with / (a relative path). If so, it prepends the domain, making it a full URL like https://domain.com/favicon.ico
+
     if (href.startsWith("/")) return `https://${domain}${href}`;
+
     return `https://${domain}/${href}`;
   } catch (error) {
     console.error("Error fetching icon:", error.message);
@@ -27,7 +54,11 @@ async function getIconUrl(domain) {
 
 export async function POST(req) {
   try {
+    // reads the incoming HTTP request body (req) and parses it as JSON
+
     const data = await req.json();
+
+    // Check whether the domain is provided or not
 
     if (!data?.domain) {
       return new Response(JSON.stringify({ error: "Domain is required" }), {
@@ -35,24 +66,37 @@ export async function POST(req) {
       });
     }
 
+    // connects your app to MongoDB database using Mongoose
+
     await mongoose.connect(process.env.MONGODB_URI);
 
+    // getServerSessions from nextauth is a function which gives details about particular session
+
     const session = await getServerSession(authOptions);
+
+    // If the user's email is missing, treat the request as unauthorized.
+
     if (!session?.user?.email) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
       });
     }
 
+    // Get the iconUrl of particular domain
+
     const icon = await getIconUrl(data.domain);
 
-    const doc = await Domain.create({
+    // Create a new domain document inside the database with domain,owner and icon
+
+    const user = await Domain.create({
       domain: data.domain,
       owner: session.user.email,
       icon,
     });
 
-    return new Response(JSON.stringify(doc), {
+    // JSON.stringfy : Converts a JavaScript value to a JavaScript Object Notation (JSON) string
+
+    return new Response(JSON.stringify(user), {
       status: 201,
       headers: { "Content-Type": "application/json" },
     });
@@ -65,23 +109,43 @@ export async function POST(req) {
 }
 
 export async function GET() {
-  await mongoose.connect(process.env.MONGODB_URI);
+  try {
+    // connects your app to MongoDB database using Mongoose
 
-  const session = await getServerSession(authOptions);
+    await mongoose.connect(process.env.MONGODB_URI);
 
-  const email = session.user?.email;
+    // getServerSession from next-auth helps us to grab the current session to extract the user details
 
-  const domains = await Domain.find({ owner: email });
+    const session = await getServerSession(authOptions);
 
-  const keywords = await Keyword.find({
-    owner: email,
-    domain: domains.map((doc) => doc.domain),
-  });
+    // get email of particular user
 
-  return Response.json({domains,keywords});
+    const email = session.user?.email;
+
+    // Find all the domains in the database for this current user by email
+
+    const domains = await Domain.find({ owner: email });
+
+    // Fetch all keywords from the database that belong to the current user (matched by email),  and only include those keywords whose domain exists in the 'domains' array
+
+    const keywords = await Keyword.find({
+      owner: email,
+      domain: domains.map((doc) => doc.domain),
+    });
+
+    return Response.json({ domains, keywords });
+  } catch (error) {
+    console.error("GET error:", error.message);
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+      status: 500,
+    });
+  }
 }
 
 export async function DELETE(req) {
+
+  // connects your app to MongoDB database using Mongoose
+
   await mongoose.connect(process.env.MONGODB_URI);
 
   const { searchParams } = new URL(req.url);
@@ -93,3 +157,55 @@ export async function DELETE(req) {
 
   return Response.json(true);
 }
+
+/*
+
+- we can also use DOMParser to parse the HTML of the domain but it only parse DOM on frontend
+
+const { default: axios } = require("axios");
+
+
+async function getIconUrl(domain) {
+  const response = await axios.get(`https://` + domain)
+  const parser = new DOMParser()
+  const parsedHTML = parser.parseFromString(response.data,"text/html")
+
+  const href = parsedHTML.querySelector('head link[rel*="icon"]').href
+
+  if(href.includes("://")){
+    return href
+  } else {
+    return `https://` + domain + href
+  }
+}
+
+---------------------------------------------------
+
+We also use DOMparser library
+
+import DOMParser from "dom-parser"
+
+
+async function getIconUrl(domain) {
+  const response = await axios.get(`https://` + domain);
+  const parser = new DOMParser();
+  const parsedHTML = parser.parseFromString(response.data, "text/html");
+  const links = parsedHTML.getElementsByTagName("link");
+
+  let href = "";
+  for (const link of links) {
+    const rel = link.attributes?.find((a) => a.name === "rel")?.value || "";
+
+    if (rel.includes("icon")) {
+      href = link.attributes?.find((a) => a.name === "href")?.value;
+    }
+  }
+
+  if (href.includes("://")) {
+    return href;
+  } else {
+    return `https://` + domain + href;
+  }
+}
+
+*/

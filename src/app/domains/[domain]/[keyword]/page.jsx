@@ -1,15 +1,12 @@
 "use client";
 
-import DoubleHeader from "@/components/DoubleHeader";
+import { Button } from "@/components/ui/button";
 import axios from "axios";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { use } from "react";
 import { HiOutlineTrash } from "react-icons/hi";
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
-
-const MySwal = withReactContent(Swal);
 
 const page = ({ params }) => {
   const { domain } = use(params);
@@ -29,50 +26,34 @@ const page = ({ params }) => {
     router.push("/domains/" + domain);
   }
 
-  const showDeletePopup = () => {
-    MySwal.fire({
-      title: (
-        <p className="text-base md:text-lg text-gray-800 leading-relaxed">
-          Are you sure you want to delete keyword {" "}
-          <span className="font-semibold text-red-600">"{decodedKeyword}"</span>?
-          <br />
-          <span className="text-base text-gray-500">
-            This action cannot be undone.
-          </span>
-        </p>
-      ),
-      cancelButtonText: "Cancel",
-      confirmButtonText: "Delete",
-      confirmButtonColor: "#f00",
-      showCloseButton: true,
-      showCancelButton: true,
-      reverseButtons: true,
-      focusCancel: true,
-      focusConfirm: false,
-    }).then((result) => {
-      if (result.isConfirmed) {
-        deleteKeyword();
-      }
-    });
-  };
-
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
-        <DoubleHeader 
-        preTitle={domain + ' »'} 
-        mainTitle={decodedKeyword} 
-        preTitleLink={`/domains/${domain}`}
-        />
+        <div className="space-y-1">
+          <Link
+            href={`/domains/${domain}`}
+            className="text-sm uppercase tracking-wider text-gray-400 block cursor-pointer"
+          >
+            Domain + " »"
+          </Link>
 
-        <button
+          <h3 className="text-sm uppercase tracking-wider block text-gray-400">
+            Domain + " »"
+          </h3>
+
+          <h2 className="text-2xl font-semibold text-gray-900 leading-snug">
+            {decodedKeyword}
+          </h2>
+        </div>
+
+        <Button
           title="Delete domain"
-          onClick={showDeletePopup}
+          onClick={() => deleteKeyword()}
           className="flex items-center gap-2 bg-gray-200 px-4 py-2 rounded-md transition hover:bg-red-100"
         >
           <HiOutlineTrash className="text-2xl" />
           Delete
-        </button>
+        </Button>
       </div>
 
       <div className="h-36 bg-green-300 rounded-md shrink-0 flex items-center justify-center text-sm font-medium"></div>
