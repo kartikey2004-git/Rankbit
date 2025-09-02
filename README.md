@@ -325,3 +325,45 @@ export default function handler(req, res) {
   }
 ]
 ```
+
+---------------------------------------------------
+
+- Next step: implement keyword support : 
+   
+    - allow adding keywords for a specific domain on its page, 
+    
+    - generate graphs from those keywords later, and provide the option to remove a domain.
+
+
+
+- When getting keywords for a particular domain , there is req.url , we request server to give response  : 
+
+```bash
+console.log(req.url); 
+
+// http://localhost:3000/api/keywords?domain=github.com
+```
+
+
+```bash
+
+# creates a URL object from the request URL
+console.log(new URL(req.url));
+
+// Here is URL object
+
+URL {
+  href: 'http://localhost:3000/api/keywords?domain=github.com',
+  origin: 'http://localhost:3000',
+  protocol: 'http:',
+  username: '',
+  password: '',
+  host: 'localhost:3000',
+  hostname: 'localhost',
+  port: '3000',
+  pathname: '/api/keywords',
+  search: '?domain=github.com',
+  searchParams: URLSearchParams { 'domain' => 'github.com' },
+  hash: ''
+}
+```

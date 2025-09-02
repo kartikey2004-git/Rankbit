@@ -7,6 +7,8 @@ const DomainRow = ({ domain, icon, keywords }) => {
       <div className="flex items-start gap-3 flex-1">
         {icon && <img src={icon} className="h-12" />}
 
+        {/* when we click on particular domain , it redirects us to single domain page where all keywords listed for particular domain */}
+
         <div>
           <Link
             className="text-lg font-semibold text-gray-900 block"

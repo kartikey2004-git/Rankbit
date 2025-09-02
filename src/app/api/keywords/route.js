@@ -7,9 +7,15 @@ import { Result } from "@/models/Results";
 
 export async function POST(req) {
   try {
+    // connects your app to MongoDB database using Mongoose
+
     await mongoose.connect(process.env.MONGODB_URI);
 
+    // getServerSessions from nextauth is a function which gives details about particular session
+
     const session = await getServerSession(authOptions);
+
+    // If the user's email is missing, treat the request as unauthorized.
 
     if (!session?.user?.email) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -17,7 +23,11 @@ export async function POST(req) {
       });
     }
 
+    // reads the incoming HTTP request body (req) and parses it as JSON and then grab the keyword and domain from request
+
     const { keyword, domain } = await req.json();
+
+    // Check that keyword or Domain is provided by user or not
 
     if (!keyword || !domain) {
       return new Response(JSON.stringify({ error: "Missing fields" }), {
@@ -25,12 +35,15 @@ export async function POST(req) {
       });
     }
 
+    // Create a new keyword document inside the database with domain,keyword and owner
+
     await Keyword.create({
       keyword,
       domain,
       owner: session?.user?.email || "anonymous",
     });
 
+    /* 
     const responseId = await doGooglesearch(keyword);
 
     if (!responseId) {
@@ -45,6 +58,8 @@ export async function POST(req) {
       domain,
       brightDataResponseId: responseId,
     });
+    
+    */
 
     return new Response({ status: 201 });
   } catch (error) {
@@ -57,23 +72,45 @@ export async function POST(req) {
 
 export async function GET(req) {
   try {
+    // connects your app to MongoDB database using Mongoose
+
     await mongoose.connect(process.env.MONGODB_URI);
 
+    // getServerSessions from nextauth is a function which gives details about particular session
+
     const session = await getServerSession(authOptions);
+
+    // If the user's email is missing, treat the request as unauthorized.
+
     if (!session?.user?.email) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
       });
     }
 
-    const { searchParams } = new URL(req.url);
+    // console.log(req.url); // http://localhost:3000/api/keywords?domain=github.com
+
+
+    // creates a URL object from the request URL and extracts its searchParams.
+
+    // searchParams lets you easily read query parameters. It’s just a shortcut for accessing query strings from the request.
+
+
+    // console.log(new URL(req.url));
+
+    const { searchParams } = new URL(req.url); 
     const domain = searchParams.get("domain");
+
+    // check if domain is present or not in requrl
 
     if (!domain) {
       return new Response(JSON.stringify({ error: "Missing domain" }), {
         status: 400,
       });
     }
+
+    // Find all the keywords in the database for particular domain and where owner is current user ( check by email )
+
     const userKeywords = await Keyword.find({
       domain,
       owner: session.user.email,
@@ -86,7 +123,7 @@ export async function GET(req) {
       status: 500,
     });
   }
-}
+}                                                 
 
 export async function DELETE(req) {
   await mongoose.connect(process.env.MONGODB_URI);

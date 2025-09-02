@@ -8,7 +8,7 @@ import { BarLoader } from "react-spinners";
 export default function Home() {
   const [domains, setDomains] = useState([]); // state define for array of domains
 
-  const [keywords, setKeywords] = useState([]); // state define for array of domains
+  const [keywords, setKeywords] = useState([]); // state define for array of keywords
 
   const [loading, setLoading] = useState(false); // state for loading
 

@@ -143,19 +143,37 @@ export async function GET() {
 }
 
 export async function DELETE(req) {
+  try {
+    // connects your app to MongoDB database using Mongoose
 
-  // connects your app to MongoDB database using Mongoose
+    await mongoose.connect(process.env.MONGODB_URI);
 
-  await mongoose.connect(process.env.MONGODB_URI);
+    // console.log(req.url); // http://localhost:3000/api/keywords?domain=github.com
 
-  const { searchParams } = new URL(req.url);
-  const domain = searchParams.get("domain");
+    // creates a URL object from the request URL and extracts its searchParams.
 
-  const session = await getServerSession(authOptions);
+    // searchParams lets you easily read query parameters. It’s just a shortcut for accessing query strings from the request.
 
-  await Domain.deleteOne({ owner: session.user?.email, domain: domain });
+    // console.log(new URL(req.url));
 
-  return Response.json(true);
+    const { searchParams } = new URL(req.url);
+    const domain = searchParams.get("domain");
+
+    // getServerSession from next-auth helps us to grab the current session to extract the user details
+
+    const session = await getServerSession(authOptions);
+
+    // Delete the domain from the database that matches the current user and the specified domain to remove.
+
+    await Domain.deleteOne({ owner: session.user?.email, domain: domain });
+
+    return Response.json(true);
+  } catch (error) {
+    console.error("GET error:", error.message);
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+      status: 500,
+    });
+  }
 }
 
 /*
