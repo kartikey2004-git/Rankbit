@@ -148,7 +148,7 @@ export async function DELETE(req) {
 
     await mongoose.connect(process.env.MONGODB_URI);
 
-    // console.log(req.url); // http://localhost:3000/api/keywords?domain=github.com
+    // console.log(req.url)
 
     // creates a URL object from the request URL and extracts its searchParams.
 

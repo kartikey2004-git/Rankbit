@@ -47,7 +47,7 @@ const NewDomainForm = ({ onNew }) => {
       <Input
         value={domain}
         onChange={handleChange}
-        className="bg-white border border-blue-200 px-4 py-4 text-lg rounded-lg grow border-b-4 focus:border-b focus:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500"
+        className="bg-white border border-blue-200 px-4 py-4 text-lg rounded-lg grow border-b-4 focus:border-b focus:border-blue-500 focus-visible:ring-1 focus-visible:ring-blue-500"
         pattern="^(?!https?:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$"
         type="text"
         title="Enter a valid domain like example.com (without https://)"

@@ -53,8 +53,8 @@ const page = () => {
     MySwal.fire({
       title: (
         <p className="text-base md:text-lg text-gray-800 leading-relaxed">
-          Are you sure you want to delete{" "}
-          <span className="font-semibold text-red-600">{domain}</span>?
+          Are you sure you want to delete domain
+          <span className="font-semibold text-red-600"> "{domain}" </span>?
           <br />
           <span className="text-base text-gray-500">
             This action cannot be undone.

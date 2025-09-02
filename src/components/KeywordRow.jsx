@@ -13,6 +13,8 @@ const KeywordRow = ({ keyword, domain }) => {
         </Link>
       </div>
 
+      {/* this will show the graph and under it I want to show , for a particular day , the position is something */}
+
       <div className="w-32 h-[72px] bg-green-100 rounded-md shrink-0 flex items-center justify-center text-green-800 text-sm font-medium"></div>
     </div>
   );

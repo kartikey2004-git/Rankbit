@@ -367,3 +367,8 @@ URL {
   hash: ''
 }
 ```
+
+--------------------------------------------------
+
+Next step: build a single keyword page where we can delete keywords and display larger, detailed graphs.
+

@@ -88,17 +88,15 @@ export async function GET(req) {
       });
     }
 
-    // console.log(req.url); // http://localhost:3000/api/keywords?domain=github.com
-
+    // console.log(req.url);
 
     // creates a URL object from the request URL and extracts its searchParams.
 
     // searchParams lets you easily read query parameters. It’s just a shortcut for accessing query strings from the request.
 
-
     // console.log(new URL(req.url));
 
-    const { searchParams } = new URL(req.url); 
+    const { searchParams } = new URL(req.url);
     const domain = searchParams.get("domain");
 
     // check if domain is present or not in requrl
@@ -123,18 +121,37 @@ export async function GET(req) {
       status: 500,
     });
   }
-}                                                 
+}
 
 export async function DELETE(req) {
-  await mongoose.connect(process.env.MONGODB_URI);
+  try {
+    // connects your app to MongoDB database using Mongoose
 
-  const { searchParams } = new URL(req.url);
-  const keyword = searchParams.get("keyword");
-  const domain = searchParams.get("domain");
+    await mongoose.connect(process.env.MONGODB_URI);
 
-  const session = await getServerSession(authOptions);
+    // console.log(req.url)
 
-  await Keyword.deleteOne({ domain, keyword, owner: session.user?.email });
+    // creates a URL object from the request URL and extracts its searchParams.
 
-  return Response.json(true);
+    // searchParams lets you easily read query parameters. It’s just a shortcut for accessing query strings from the request.
+
+    const { searchParams } = new URL(req.url);
+    const keyword = searchParams.get("keyword");
+    const domain = searchParams.get("domain");
+
+    // getServerSessions from nextauth is a function which gives details about particular session
+
+    const session = await getServerSession(authOptions);
+
+    // Delete a keyword that belongs to the current user (by email) and matching the specified domain and keyword.
+
+    await Keyword.deleteOne({ domain, keyword, owner: session.user?.email });
+
+    return Response.json(true);
+  } catch (error) {
+    console.error("GET error:", error.message);
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+      status: 500,
+    });
+  }
 }
