@@ -15,6 +15,8 @@ import { toast } from "sonner";
 const page = () => {
   const [keywords, setKeywords] = useState([]); //state define for array of keywords
 
+  const [results, setResults] = useState([]); //state define for array of results
+
   const [loading, setLoading] = useState(false); // state for loading
 
   // useRouter is only for navigation (push, replace, back, etc)
@@ -31,7 +33,8 @@ const page = () => {
     try {
       setLoading(true);
       const response = await axios.get(`/api/keywords?domain=${domain}`);
-      setKeywords(response.data);
+      setKeywords(response.data.keywords);
+      setResults(response.data.results);
     } catch (error) {
       console.error("Error fetching keywords:", error);
     } finally {
@@ -112,7 +115,11 @@ const page = () => {
         <BarLoader className="mb-4" width={"100%"} color="#3B82F6" />
       ) : (
         keywords.map((keywordObj) => (
-          <KeywordRow key={keywordObj._id} {...keywordObj} />
+          <KeywordRow
+            key={keywordObj._id}
+            {...keywordObj}
+            results={results.filter((r) => r.keyword === keywordObj.keyword)}
+          />
         ))
       )}
 

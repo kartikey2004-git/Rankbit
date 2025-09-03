@@ -16,7 +16,6 @@ const resultSchema = new mongoose.Schema(
     },
     rank: {
       type: String,
-      default: "pending"
     },
   },
   { timestamps: true }

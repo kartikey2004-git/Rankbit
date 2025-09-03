@@ -1,91 +1,113 @@
 /*
 
+Hum yaha Bright Data ka SERP API use karne wale hain for scraping 
+          
 
-const puppeteer = require("puppeteer");
+   - Reason: agar Google apni HTML structure ya system change kare toh Bright Data apni API turant update kar deta hai.
 
-async function getKeywordRank(domain, keyword) {
-  const browser = await puppeteer.launch({ headless: true });
-  const page = await browser.newPage();
+   - Matlab hum API par rely kar sakte hain ki hamesha kaam karegi.
 
-  await page.setUserAgent(
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/91.0.4472.124 Safari/537.36"
-  );
-  await page.setViewport({ width: 1280, height: 800 });
-  await page.goto(
-    `https://www.google.com/search?q=${encodeURIComponent(keyword)}`,
-    {
-      waitUntil: "networkidle2",
-    }
-  );
-  const results = await page.$$eval("#search a > h3", (elems) => {
-    return elems.map((h3) => {
-      const title = h3.innerText;
-      const link = h3.parentElement.href;
-      return { title, link };
-    });
-  });
-  const rank = results.findIndex((r) => r.link.includes(domain)) + 1;
-  console.log(results);
-  console.log(
-    `\n"${domain}" ranked at position:`,
-    rank === 0 ? "Not Found" : rank
-  );
-  await browser.close();
-}
-(async () => {
-  await getKeywordRank("github.com", "git");
-})();
+   - API fast hai aur results zyada precise milte hain.
 
-----------------------------------------------------
 
-const SerpApi = require('google-search-results-nodejs');
-const search = new SerpApi.GoogleSearch("YOUR_API_KEY_HERE"); // 🔑 Add your API key here
-async function getKeywordRank(keyword, domain) {
- return new Promise((resolve, reject) => {
- search.json({
- q: keyword,
- location: "India", // optional
- num: 100 // fetch top 100 results
- }, (data) => {
- if (!data.organic_results) {
- return resolve("No results");
- }
- const index = data.organic_results.findIndex((result) =>
- result.link && result.link.includes(domain)
- );
- resolve(index === -1 ? "Not Found" : index + 1);
- });
- });
-}
-(async () => {
- const position = await getKeywordRank("github", "github.com");
- console.log(`"github.com" ranked at position: ${position}`);
-})();
 
+Is API se hum alag-alag search engines ke liye keywords ki positions bhi check kar sakte hain.
+     
+
+    - Response JSON kaafi pretty hota hai, aur uske andar bahut saari useful info hoti hai.
+
+
+--------------------------------------------------
+
+
+Ab baat aati hai sync vs async requests ki.
+
+   - Agar hum sync request bhejte hain (default), toh flow aisa hota hai:
+
+        - hum ek keyword bhejte hain, woh request process hoti hai
+
+        - aur API kuch seconds ke baad result return karti hai.
+
+        - Problem: agar Vercel par deploy kiya ho,toh ye 5–10 seconds ka run-time hume charge karega. 
+   
+
+   - Isliye async request enable karna better hota hai.
+       
+
+        -  Async mode mein hum API ko request bhejte hai
+
+        - woh immediately bolta hai: request received, hum check karke ready hone par results bhejenge.
+
+        - Matlab hume wait nahi karna padta.
+        
+        - Jab unke paas data ready ho jaata hai, woh hume callback endpoint pe notify kar dete hain.  
+
+--------------------------------------------------
+
+
+     - Ye approach Puppeteer se possible nahi hoti, kyunki Puppeteer mein hum khud Google khol ke parse karte hain.
+
+
+     - Yaha Bright Data khud Google scrape karke positions, titles, links sab ready kar ke bhejta hai.  
+
+
+     - Lekin ek dikkat hai: hume ek public callback URL dena padta hai jaha woh results bhejenge.
+     
+
+     - Agar hum local dev mein hain (http://localhost:3000), toh woh publically accessible nahi hota.
+
+
+     - Matlab agar hum friend ko ye link bheje, uske system pe kaam hi nahi karega — error 404 aayega.  
+
+
+
+     - Solution: hume ek public URL chahiye hota hai , toh Deploy karenge toh Vercel hume automatically ek public URL dega.  
+
+
+     - Aur agar abhi development mein hi test karna hai,  toh hum "tunnelmole" (ya ngrok jaise tools) use kar sakte hain jo local server ko ek temporary public URL de dete hain.
+
+
+--------------------------------------------------
+
+
+   - ngrok ek tool hai jo tumhare local server ko ek public URL deta hai.
+       
+
+       - Matlab agar tumhari app localhost:3000 pe chal rahi hai
+       
+       - toh ngrok use ek public internet URL bana dega jise tum kahin se access kar sakte ho ( ya Bright Data jaise APIs ko callback URL de sakte ho ).
+
+  
 */
 
-const axios = require("axios");
-const dotenv = require("dotenv");
+import axios from "axios";
+import "dotenv/config";
 
-dotenv.config();
+// So when we add a keyword , we want to fetch a position and every midnight we want to grab a position for all of the keywords
 
-export async function doGooglesearch(keyword) {
+// function to ask them for to do google search for a keyword
+
+export async function doGoogleSearch(keyword) {
   const data = {
     country: "us",
     query: { q: keyword },
+    brd_json: "json", // JSON response enable
   };
 
   const url =
-    "https://api.brightdata.com/serp/req?customer=hl_0342ed83&zone=rankbitt";
+    "https://api.brightdata.com/serp/req?customer=hl_ae9fc608&zone=rankbit";
 
   const headers = {
-    Authorization: "Bearer " + process.env.BRIGHTDATA_API_KEY,
+    Authorization: `Bearer ${process.env.BRIGHTDATA_API_KEY}`,
   };
+
+  // from this We'll get the result id from this post request to brightdata , to fetch response later when data is ready
 
   try {
     const res = await axios.post(url, data, { headers });
+    const responseId = res.headers["x-response-id"];
 
-    return res.headers.get("x-response-id");
+    return responseId;
   } catch (error) {
     console.error(
       "BrightData request failed:",
@@ -95,3 +117,6 @@ export async function doGooglesearch(keyword) {
   }
 }
 
+// Jab unke paas data ready ho jaata hai, woh hume callback endpoint pe notify kar dete hain.
+
+// there is another request because they are going to send req to our callback endpoint API

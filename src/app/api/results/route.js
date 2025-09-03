@@ -1,33 +1,38 @@
 import { Result } from "@/models/Results";
 import axios from "axios";
+import mongoose from "mongoose";
 
 export async function POST(req) {
-  try {
-    const { response_id } = await req.json();
+  await mongoose.connect(process.env.MONGODB_URI);
 
-    if (!response_id) {
-      return new Response(JSON.stringify({ error: "Missing response_id" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+  const data = await req.json();
+  // console.log(data);
 
-    const url = `https://api.brightdata.com/serp/get_result?output=json&customer=hl_0342ed83&zone=rankbitt&response_id=${response_id}`;
+  const response_id = data.response_id;
 
-    const headers = {
+  // to parse version of the result HTML
+  const url = `https://api.brightdata.com/serp/get_result?&output=json&customer=hl_ae9fc608&zone=rankbit&response_id=${response_id}`;
+
+  console.log("Fetching result for:" + response_id);
+
+  const res = await axios.get(url, {
+    headers: {
       Authorization: `Bearer ${process.env.BRIGHTDATA_API_KEY}`,
-    };
+      "Content-Type": "application/json",
+    },
+  });
 
-    const res = await axios.get(url, { headers });
+  const ourResultDoc = await Result.findOne({
+    brightDataResponseId: response_id,
+  });
 
-    const ourResultDoc = await Result.findOne({
-      brightDataResponseId: response_id,
-    });
-
+  if (ourResultDoc) {
     const domain = ourResultDoc.domain;
     const keyword = ourResultDoc.keyword;
 
-    const rank = res?.data?.organic?.find((result) =>
+    const organicData = res.data.organic;
+
+    const rank = organicData.find((result) =>
       result.link.includes(domain)
     )?.rank;
 
@@ -36,26 +41,30 @@ export async function POST(req) {
       console.log(
         `Rank ${rank} saved for keyword ${keyword} and domain ${domain}`
       );
-
       await ourResultDoc.save();
     }
-
-    return new Response(JSON.stringify(res.data), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (error) {
-    console.error(
-      "BrightData request failed:",
-      error.response?.data || error.message
-    );
-
-    return new Response(
-      JSON.stringify({
-        error: "BrightData request failed",
-        detail: error.response?.data || error.message,
-      }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+  } else {
+    console.log("our result NOT found");
   }
+
+  return Response.json(true);
+}
+
+export async function GET(req) {
+  await mongoose.connect(process.env.MONGODB_URI);
+
+  // console.log(req.url);
+
+  // creates a URL object from the request URL and extracts its searchParams.
+
+  // searchParams lets you easily read query parameters. It’s just a shortcut for accessing query strings from the request.
+
+  // console.log(new URL(req.url));
+
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
+
+  const result = Result.findOne({ brightDataResponseId: id });
+
+  return new Response(JSON.stringify(result), { status: 200 });
 }

@@ -2,8 +2,8 @@ import { Keyword } from "@/models/Keywords";
 import mongoose from "mongoose";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
-import { doGooglesearch } from "@/lib/rankingFunction";
 import { Result } from "@/models/Results";
+import { doGoogleSearch } from "@/lib/rankingFunction";
 
 export async function POST(req) {
   try {
@@ -43,8 +43,7 @@ export async function POST(req) {
       owner: session?.user?.email || "anonymous",
     });
 
-    /* 
-    const responseId = await doGooglesearch(keyword);
+    const responseId = await doGoogleSearch(keyword);
 
     if (!responseId) {
       return Response.json(
@@ -53,13 +52,13 @@ export async function POST(req) {
       );
     }
 
+    // console.log(responseId);
+
     const result = await Result.create({
       keyword,
       domain,
       brightDataResponseId: responseId,
     });
-    
-    */
 
     return new Response({ status: 201 });
   } catch (error) {
@@ -109,12 +108,23 @@ export async function GET(req) {
 
     // Find all the keywords in the database for particular domain and where owner is current user ( check by email )
 
-    const userKeywords = await Keyword.find({
+    const keywordsDocs = await Keyword.find({
       domain,
       owner: session.user.email,
     });
 
-    return new Response(JSON.stringify(userKeywords), { status: 200 });
+    const resultsDocs = await Result.find({
+      domain,
+      keyword: keywordsDocs.map((doc) => doc.keyword),
+    });
+
+    return new Response(
+      JSON.stringify({
+        keywords: keywordsDocs,
+        results: resultsDocs,
+      }),
+      { status: 200 }
+    );
   } catch (err) {
     console.error("GET /keywords error:", err.message);
     return new Response(JSON.stringify({ error: "Internal Server Error" }), {
