@@ -1,9 +1,10 @@
 import Link from "next/link";
 import React from "react";
+import Chart from "./Chart";
 
-const DomainRow = ({ domain, icon, keywords }) => {
+const DomainRow = ({ domain, icon, keywords, results }) => {
   return (
-    <div className="flex items-center justify-between gap-4 p-4 rounded-xl bg-white border border-blue-200 shadow-sm my-4">
+    <div className="flex items-center justify-between gap-4 my-4 flex-col sm:flex-row border border-gray-300 rounded-xl p-4 shadow-md hover:shadow-xl transition-shadow duration-300 w-full max-w-3xl mx-auto">
       <div className="flex items-start gap-3 flex-1">
         {icon && <img src={icon} className="h-12" />}
 
@@ -11,7 +12,7 @@ const DomainRow = ({ domain, icon, keywords }) => {
 
         <div>
           <Link
-            className="text-lg font-semibold text-gray-900 block"
+            className="text-lg font-semibold text-gray-100 block"
             href={"/domains/" + domain}
           >
             {domain}
@@ -23,7 +24,9 @@ const DomainRow = ({ domain, icon, keywords }) => {
                 <Link
                   href={"/domains/" + domain + "/" + keywordDoc.keyword}
                   key={i}
-                  className="bg-gray-100 text-gray-700 px-2 py-1 rounded-md text-sm font-medium"
+                  className="shadow-lg
+        bg-black backdrop-blur-md border border-white/20 text-gray-200  px-2 py-1 rounded-md text-sm font-medium  transition-all duration-300 
+"
                 >
                   {keywordDoc.keyword}
                 </Link>
@@ -33,13 +36,14 @@ const DomainRow = ({ domain, icon, keywords }) => {
         </div>
       </div>
 
-      <div className="w-32 h-[72px] bg-green-100 rounded-md shrink-0" />
+      <div>
+        <Chart results={results} width={300} />
+      </div>
     </div>
   );
 };
 
 export default DomainRow;
-
 
 /*
 

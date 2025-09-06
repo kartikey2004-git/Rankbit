@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { HiOutlineTrash } from "react-icons/hi";
 import MySwal from "@/lib/swal.js";
 import { toast } from "sonner";
+import Chart from "@/components/Chart";
 
 const page = () => {
   // useRouter is only for navigation (push, replace, back, etc)
@@ -19,6 +20,8 @@ const page = () => {
   const params = useParams(); // returns an object of route params
 
   const { keyword, domain } = params; // destructuting the params
+
+  const [results, setResults] = useState([]);
 
   // decodeURIComponent : Gets the unencoded version of an encoded component of a Uniform Resource Identifier (URI).
 
@@ -51,6 +54,16 @@ const page = () => {
     });
   }
 
+  function fetchResults() {
+    axios
+      .get(`/api/keywords?keyword=${keyword}&domain=${domain}`)
+      .then((response) => setResults(response.data.results));
+  }
+
+  useEffect(() => {
+    fetchResults();
+  }, []);
+
   const deleteKeyword = async () => {
     try {
       const urlParams =
@@ -74,12 +87,12 @@ const page = () => {
         <div className="space-y-1">
           <Link
             href={`/domains/${domain}`}
-            className="text-sm uppercase tracking-wider text-gray-400 block cursor-pointer"
+            className="text-sm tracking-wider text-gray-400 block cursor-pointer"
           >
             {domain} »
           </Link>
 
-          <h2 className="text-2xl font-semibold text-gray-900 leading-snug">
+          <h2 className="text-2xl font-semibold text-gray-200 leading-snug">
             {decodedKeyword}
           </h2>
         </div>
@@ -94,9 +107,15 @@ const page = () => {
         </Button>
       </div>
 
-      <div className="h-36 bg-green-300 rounded-md shrink-0 flex items-center justify-center text-sm font-medium"></div>
+      {results && (
+        <div>
+          <Chart width={"100%"} results={results} />
+        </div>
+      )}
     </div>
   );
 };
 
 export default page;
+
+// This is single page for keyword for a specific domain and view all the stats and graphs for that keyword

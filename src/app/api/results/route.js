@@ -3,68 +3,104 @@ import axios from "axios";
 import mongoose from "mongoose";
 
 export async function POST(req) {
-  await mongoose.connect(process.env.MONGODB_URI);
+  try {
+    // connects your app to MongoDB database using Mongoose
 
-  const data = await req.json();
-  // console.log(data);
+    await mongoose.connect(process.env.MONGODB_URI);
 
-  const response_id = data.response_id;
+    // Parse the incoming request body as JSON
+    const data = await req.json();
 
-  // to parse version of the result HTML
-  const url = `https://api.brightdata.com/serp/get_result?&output=json&customer=hl_ae9fc608&zone=rankbit&response_id=${response_id}`;
+    // console.log(data);
 
-  console.log("Fetching result for:" + response_id);
+    // Get response_id from the parsed request body
+    const response_id = data.response_id;
 
-  const res = await axios.get(url, {
-    headers: {
-      Authorization: `Bearer ${process.env.BRIGHTDATA_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-  });
+    const url = `https://api.brightdata.com/serp/get_result?customer=hl_ae9fc608&zone=rankbit&response_id=${response_id}`;
 
-  const ourResultDoc = await Result.findOne({
-    brightDataResponseId: response_id,
-  });
+    console.log("Fetching result for:" + response_id); //  Fetching data from BrightData API using this responseId
 
-  if (ourResultDoc) {
-    const domain = ourResultDoc.domain;
-    const keyword = ourResultDoc.keyword;
+    // Use this responseId to fetch rank data from BrightData API for the given keyword and domain
 
-    const organicData = res.data.organic;
+    const res = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${process.env.BRIGHTDATA_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+    });
 
-    const rank = organicData.find((result) =>
-      result.link.includes(domain)
-    )?.rank;
+    // Find the result document in the database using the BrightData responseId
 
-    if (rank) {
-      ourResultDoc.rank = rank;
-      console.log(
-        `Rank ${rank} saved for keyword ${keyword} and domain ${domain}`
-      );
-      await ourResultDoc.save();
+    const ourResultDoc = await Result.findOne({
+      brightDataResponseId: response_id,
+    });
+
+    // If a result document is found using the BrightData responseId,
+
+    if (ourResultDoc) {
+      console.log("our result found");
+
+      // extract its domain and keyword from resultDoc
+
+      const domain = ourResultDoc.domain;
+      const keyword = ourResultDoc.keyword;
+
+      // From the BrightData SERP API response (fetched using responseId), set the organic results data
+
+      const organicData = res.data.organic;
+
+      // Search organicData for a result where the link includes the domain, then get its rank
+
+      const rank = organicData.find((result) =>
+        result.link.includes(domain)
+      )?.rank;
+
+      // If rank is found, update the resultDoc with it and save the document
+
+      if (rank) {
+        ourResultDoc.rank = rank;
+        console.log(
+          `Rank ${rank} saved for keyword ${keyword} and domain ${domain}`
+        );
+        await ourResultDoc.save();
+      }
+    } else {
+      console.log("our result NOT found");
     }
-  } else {
-    console.log("our result NOT found");
-  }
 
-  return Response.json(true);
+    return Response.json(true);
+  } catch (error) {
+    console.error("POST /results error:", error.message);
+    return new Response(JSON.stringify({ error: "Error in updating results" }));
+  }
 }
 
 export async function GET(req) {
-  await mongoose.connect(process.env.MONGODB_URI);
+  try {
+    // connects your app to MongoDB database using Mongoose
 
-  // console.log(req.url);
+    await mongoose.connect(process.env.MONGODB_URI);
 
-  // creates a URL object from the request URL and extracts its searchParams.
+    // console.log(req.url);
 
-  // searchParams lets you easily read query parameters. It’s just a shortcut for accessing query strings from the request.
+    // creates a URL object from the request URL and extracts its searchParams.
 
-  // console.log(new URL(req.url));
+    // searchParams lets you easily read query parameters. It’s just a shortcut for accessing query strings from the request.
 
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get("id");
+    // console.log(new URL(req.url));
 
-  const result = Result.findOne({ brightDataResponseId: id });
+    const { searchParams } = new URL(req.url);
 
-  return new Response(JSON.stringify(result), { status: 200 });
+    // Extract brightResponseId from searchParams
+    const id = searchParams.get("id");
+
+    // Find the resultDoc in the database using the brightDataResId
+
+    const result = await Result.findOne({ brightDataResponseId: id });
+
+    return Response.json(result);
+  } catch (error) {
+    console.error("GET /results error:", error.message);
+    return new Response(JSON.stringify({ error: "Error in getting results" }));
+  }
 }

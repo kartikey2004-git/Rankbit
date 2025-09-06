@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "title": "Keyword Tracking",
+    "description": "Track your keywords in real-time across multiple search engines with precise ranking updates.",
+    "icon": "Search"
+  },
+  {
+    "id": 2,
+    "title": "Competitor Analysis",
+    "description": "Compare your rankings against competitors and find new keyword opportunities.",
+    "icon": "TrendingUp"
+  },
+  {
+    "id": 3,
+    "title": "SEO Graphs",
+    "description": "Visualize performance with clean and interactive graphs that highlight growth trends.",
+    "icon": "BarChart"
+  }
+]

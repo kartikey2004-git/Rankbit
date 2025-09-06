@@ -6,7 +6,6 @@ import LoginScreen from "@/app/LoginScreen";
 import Header from "./Header";
 import { Toaster } from "@/components/ui/sonner";
 
-
 // Here are some font styles for text content inside our app
 
 const geistSans = Geist({
@@ -27,39 +26,36 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
+  // getServerSession : NextAuth function that lets you check if a user is logged in or not(authenticated) on the server side.
 
-  // getServerSession : NextAuth function that lets you check if a user is logged in (authenticated) on the server side.
+  // authOptions : These are your NextAuth configuration options (like providers, callbacks, secret, etc.)
 
-  // authOptions :These are your NextAuth configuration options (like providers, callbacks, secret, etc.)
-
-  const session = await getServerSession(authOptions); 
+  const session = await getServerSession(authOptions);
 
   // console.log({session})
 
   // If the user is logged in, this will contain their session data (name, email, image, etc.). If they are not logged in, it will be null.
-  
-
 
   // rendering children on layout page where children is page.js (home page)
 
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}
       >
-
         {/* If you’re not logged in, you won’t be able to see the children — instead, the login screen will appear. */}
 
-        {!session && <LoginScreen />} 
-
+        {!session && <LoginScreen />}
 
         {/* If you’re logged in, you’ll see the children (the app content).*/}
 
         {session && (
-          <div className="max-w-4xl mx-auto">
-            <Header />
-            {children}
+          <div className="min-h-screen bg-black px-4 py-8">
+            <div className="max-w-4xl mx-auto">
+              <Header />
+              {children}
               <Toaster />
+            </div>
           </div>
         )}
       </body>

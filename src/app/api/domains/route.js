@@ -5,6 +5,7 @@ import { authOptions } from "../auth/[...nextauth]/route";
 import axios from "axios";
 import * as cheerio from "cheerio";
 import { Keyword } from "@/models/Keywords";
+import { Result } from "@/models/Results";
 
 async function getIconUrl(domain) {
   try {
@@ -101,10 +102,8 @@ export async function POST(req) {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("POST error:", error.message);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-      status: 500,
-    });
+    console.error("POST /domain error:", error.message);
+    return new Response(JSON.stringify({ error: "Error in creating  domain" }));
   }
 }
 
@@ -133,12 +132,17 @@ export async function GET() {
       domain: domains.map((doc) => doc.domain),
     });
 
-    return Response.json({ domains, keywords });
-  } catch (error) {
-    console.error("GET error:", error.message);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-      status: 500,
+    const results = await Result.find({
+      domain: domains.map((doc) => doc.domain),
+      keyword: keywords.map((doc) => doc.keyword),
     });
+
+    return Response.json({ domains, keywords , results});
+  } catch (error) {
+    console.error("GET /domains error:", error.message);
+    return new Response(
+      JSON.stringify({ error: "Error fetching Domain and keywords" })
+    );
   }
 }
 
@@ -163,16 +167,14 @@ export async function DELETE(req) {
 
     const session = await getServerSession(authOptions);
 
-    // Delete the domain from the database that matches the current user and the specified domain to remove.
+    // Delete the domain from the database that matches the current user and the specified domain to which we had to remove.
 
     await Domain.deleteOne({ owner: session.user?.email, domain: domain });
 
     return Response.json(true);
   } catch (error) {
-    console.error("GET error:", error.message);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-      status: 500,
-    });
+    console.error("DELETE /keyword error:", error.message);
+    return new Response(JSON.stringify({ error: "Error in deleting domain" }));
   }
 }
 

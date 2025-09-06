@@ -31,14 +31,16 @@ const NewKeywordForm = ({ onNew, domain }) => {
       <Input
         value={keyword}
         onChange={(e) => setKeyword(e.target.value)}
-        className="bg-white border border-blue-200 px-4 py-4 text-lg rounded-lg grow border-b-4 focus:border-b focus:border-blue-500 focus-visible:ring-1 focus-visible:ring-blue-500"
+        className="border px-4 py-4 text-lg rounded-lg grow focus:border-b focus-visible:ring-1 text-gray-100"
         type="text"
         placeholder="Add new KeyWord"
       />
 
       <Button
         type="submit"
-        className="px-8 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium  border-b-4 border-indigo-800 transition-all duration-200"
+        className="px-8 py-4 font-semibold shadow-lg
+        bg-black backdrop-blur-md border border-white/20 text-gray-200 text-lg rounded-full transition-all duration-300 
+        hover:scale-[1.03] active:scale-[0.97]"
       >
         Add
       </Button>

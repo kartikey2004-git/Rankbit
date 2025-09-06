@@ -6,7 +6,7 @@ const LogoutLink = () => {
   return (
     <div 
     onClick={() => signOut()}
-    className='text-slate-500 hover:underline cursor-pointer'>
+    className='text-gray-200 hover:underline cursor-pointer'>
       Logout &raquo;
     </div>
   )

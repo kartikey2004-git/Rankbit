@@ -94,7 +94,7 @@ const page = () => {
             Domains »
           </Link>
 
-          <h2 className="text-2xl font-semibold text-gray-900 leading-snug">
+          <h2 className="text-2xl font-semibold text-gray-200 leading-snug">
             {domain}
           </h2>
         </div>
@@ -112,7 +112,7 @@ const page = () => {
       <NewKeywordForm domain={domain} onNew={fetchKeywords} />
 
       {loading ? (
-        <BarLoader className="mb-4" width={"100%"} color="#3B82F6" />
+        <BarLoader className="mb-4" width={"100%"} color="#ffffff" />
       ) : (
         keywords.map((keywordObj) => (
           <KeywordRow
@@ -123,7 +123,7 @@ const page = () => {
         ))
       )}
 
-      {!loading && !keywords?.length && <div>No Keywords found:</div>}
+      {!loading && !keywords?.length && <div>No Keywords found.</div>}
     </div>
   );
 };

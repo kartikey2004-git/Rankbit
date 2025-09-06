@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "question": "What is RankBit?",
+    "answer": "RankBit is a smart SEO rank tracker that helps you monitor keyword rankings, competitors, and growth in one place."
+  },
+  {
+    "id": 2,
+    "question": "How often are rankings updated?",
+    "answer": "Rankings are updated daily, and you can request manual refreshes if needed."
+  },
+  {
+    "id": 3,
+    "question": "Can I track competitors?",
+    "answer": "Yes, you can add competitor domains and compare their keyword positions with yours."
+  },
+  {
+    "id": 4,
+    "question": "Do you offer a free plan?",
+    "answer": "Yes, RankBit offers a free plan with limited keyword tracking. Paid plans unlock more features."
+  }
+]

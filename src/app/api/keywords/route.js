@@ -37,13 +37,17 @@ export async function POST(req) {
 
     // Create a new keyword document inside the database with domain,keyword and owner
 
-    await Keyword.create({
+    const keywordDoc = await Keyword.create({
       keyword,
       domain,
-      owner: session?.user?.email || "anonymous",
+      owner: session?.user?.email,
     });
 
+    // doGoogleSearch triggers a BrightData SERP API query , which returns a responseId and that responseId is later used to fetch the keyword’s rank for a given domain.
+
     const responseId = await doGoogleSearch(keyword);
+
+    // Check whether the API call returns a responseId
 
     if (!responseId) {
       return Response.json(
@@ -52,20 +56,18 @@ export async function POST(req) {
       );
     }
 
-    // console.log(responseId);
+    // Create a resultDoc that stores the responseId along with the domain and keyword, so we can later fetch the keyword’s rank for that domain from BrightData Serp API
 
-    const result = await Result.create({
+    await Result.create({
       keyword,
       domain,
       brightDataResponseId: responseId,
     });
 
-    return new Response({ status: 201 });
+    return Response.json(keywordDoc);
   } catch (error) {
-    console.error("Keyword creation error:", error.message);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-      status: 500,
-    });
+    console.error("POST /keyword error:", error.message);
+    return new Response(JSON.stringify({ error: "Error creating keyword" }));
   }
 }
 
@@ -97,8 +99,9 @@ export async function GET(req) {
 
     const { searchParams } = new URL(req.url);
     const domain = searchParams.get("domain");
+    const keyword = searchParams.get("keyword");
 
-    // check if domain is present or not in requrl
+    // check if domain is present or not in req.url
 
     if (!domain) {
       return new Response(JSON.stringify({ error: "Missing domain" }), {
@@ -106,30 +109,35 @@ export async function GET(req) {
       });
     }
 
-    // Find all the keywords in the database for particular domain and where owner is current user ( check by email )
+    const keywordsDocs = await Keyword.find(
+      keyword
+        ? {
+            domain,
+            keyword,
+            owner: session.user.email,
+          }
+        : {
+            domain,
+            owner: session.user.email,
+          }
+    );
 
-    const keywordsDocs = await Keyword.find({
-      domain,
-      owner: session.user.email,
-    });
+    // Fetch all keywords from the database for a given domain where the owner matches the current user (verified by email)
+
+    // Fetch all resultDocs for a given domain that match the keywords stored in the database for that domain.
 
     const resultsDocs = await Result.find({
       domain,
       keyword: keywordsDocs.map((doc) => doc.keyword),
     });
 
-    return new Response(
-      JSON.stringify({
-        keywords: keywordsDocs,
-        results: resultsDocs,
-      }),
-      { status: 200 }
-    );
+    return Response.json({
+      keywords: keywordsDocs,
+      results: resultsDocs,
+    });
   } catch (err) {
     console.error("GET /keywords error:", err.message);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-      status: 500,
-    });
+    return new Response(JSON.stringify({ error: "Error in getting keywords" }));
   }
 }
 
@@ -146,22 +154,34 @@ export async function DELETE(req) {
     // searchParams lets you easily read query parameters. It’s just a shortcut for accessing query strings from the request.
 
     const { searchParams } = new URL(req.url);
+
+    // Extracts keywords and domain from searchParams
+
     const keyword = searchParams.get("keyword");
     const domain = searchParams.get("domain");
 
     // getServerSessions from nextauth is a function which gives details about particular session
 
+    const decodedKeyword = encodeURIComponent(keyword);
+
     const session = await getServerSession(authOptions);
 
-    // Delete a keyword that belongs to the current user (by email) and matching the specified domain and keyword.
+    // Delete a keyword that belongs to the current user (by email) and matching by the specified domain and keyword.
 
-    await Keyword.deleteOne({ domain, keyword, owner: session.user?.email });
+    await Keyword.deleteOne({
+      domain,
+      keyword: decodedKeyword,
+      owner: session.user?.email,
+    });
 
     return Response.json(true);
   } catch (error) {
-    console.error("GET error:", error.message);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-      status: 500,
-    });
+    console.error("DELETE /keyword error:", error.message);
+    return new Response(
+      JSON.stringify({ error: "Error in deleting keyword" }),
+      {
+        status: 500,
+      }
+    );
   }
 }
