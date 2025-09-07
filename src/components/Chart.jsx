@@ -1,42 +1,36 @@
-import { sortBy, sumBy, uniqBy } from "lodash";
+import { sortBy, uniqBy } from "lodash";
 import React from "react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, YAxis } from "recharts";
 
 const Chart = ({ results, width }) => {
+  console.log("Raw results:", results);
 
-  results = (results || [])?.filter((r) => r.rank);
-  if (!results?.length) {
-    return "";
-  }
+  results = (results || []).filter((r) => r.rank);
+  if (!results?.length) return "";
 
-  const lowestRank = sortBy(results,'rank').reverse()?.[0].rank;
-  const domainLow = lowestRank+3;
-
-  let data = results;
-  data = data.map(result => {
-    return {
-      keyword: result.keyword,
-      date:result.createdAt.substring(0,10),
-      rank:result.rank,
-      points:domainLow-result.rank,
-    };
-  });
+  // Map results into usable form
+  let data = results.map((result) => ({
+    keyword: result.keyword,
+    date: result.createdAt.substring(0, 10),
+    rank: result.rank,
+  }));
 
   const originalData = [...data];
-  data = uniqBy(data, r => r.date);
+  data = uniqBy(data, (r) => r.date);
 
-  data.forEach((result,index) => {
-
-    const originalDataResults = originalData
-      .filter(oResult => oResult.date === result.date);
-
-    if (originalDataResults.length > 1) {
-      data[index]['points'] = sumBy(originalDataResults, 'points') / originalDataResults.length;
-      data[index]['rank'] = sumBy(originalDataResults, 'rank') / originalDataResults.length;
+  // Pick best rank per date
+  data.forEach((result, index) => {
+    const sameDay = originalData.filter((o) => o.date === result.date);
+    if (sameDay.length > 1) {
+      data[index].rank = Math.min(...sameDay.map((r) => r.rank));
     }
   });
 
-  data = sortBy(data,'date');
+  data = sortBy(data, "date");
+
+  // Compute Y domain
+  const minRank = Math.min(...data.map((r) => r.rank));
+  const maxRank = Math.max(...data.map((r) => r.rank));
 
   return (
     <div>
@@ -48,24 +42,26 @@ const Chart = ({ results, width }) => {
         >
           <defs>
             <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#ffffff" stopOpacity={0.6} />
-              <stop offset="95%" stopColor="#ffffff" stopOpacity={0.05} />
+              <stop offset="5%" stopColor="#000000" stopOpacity={0.6} />
+              <stop offset="95%" stopColor="#000000" stopOpacity={0.05} />
             </linearGradient>
           </defs>
 
-          <YAxis hide={true} domain={[99, lowestRank]} />
+          {/* Y axis now scales properly */}
+          <YAxis hide={true} domain={[minRank - 2, maxRank + 2]} />
 
           <Tooltip
             labelFormatter={(value, name, props) =>
-              name?.[0]?.payload?.date?.substring(0, 10)
+              props?.payload?.date?.substring(0, 10)
             }
             formatter={(value, name, props) => [
-              "rank: " + props?.payload?.rank,
+              "Rank: " + props?.payload?.rank,
             ]}
           />
+
           <Area
             type="monotone"
-            dataKey="points"
+            dataKey="rank"
             stroke="#000000"
             fillOpacity={1}
             fill="url(#colorPv)"

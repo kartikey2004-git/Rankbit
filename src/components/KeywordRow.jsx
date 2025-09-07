@@ -2,38 +2,44 @@
 
 import axios from "axios";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Chart from "./Chart";
 
-const KeywordRow = ({ keyword, domain, results }) => {
-  const latestResult = [...results].reverse()[0];
-  const [latestRank, setLatestRank] = useState(latestResult?.rank);
+const KeywordRow = ({ keyword, domain, results: defaultResults }) => {
+  const resultsRef = useRef(defaultResults || []);
 
-  const router = useRouter();
+  const isCompleteRef = useRef(
+    resultsRef.current.filter((r) => r.complete).length > 0
+  );
 
-  function checkRank() {
-    if (!latestRank) {
-      const url = "/api/results?id=" + latestResult.brightDataResponseId;
+  const rankExistsRef = useRef(
+    resultsRef.current.filter((r) => r.rank).length > 0
+  );
 
-      axios.get(url).then((response) => {
-        const newRankFromDatabase = response.data.rank;
-        if (newRankFromDatabase) {
-          setLatestRank(newRankFromDatabase);
-          router.refresh();
-        } else {
-          // retry after 3 sec if rank not ready
-          setTimeout(checkRank, 3000);
-        }
-      });
-    }
-  }
+  const [isComplete, setIsComplete] = useState(isCompleteRef.current);
+
+  const [rankExists, setRankExists] = useState(rankExistsRef.current);
 
   useEffect(() => {
-    if (!latestRank) {
-      checkRank();
+    reFetchResultIfNoRank();
+  }, []);
+
+  function reFetchResultIfNoRank() {
+    if (!isCompleteRef.current) {
+      axios
+        .get(`/api/results?domain=${domain}&keyword=${keyword}`)
+        .then((res) => {
+          resultsRef.current = res.data;
+          isCompleteRef.current = res.data.filter((r) => r.complete).length > 0;
+          rankExistsRef.current = res.data.filter((r) => r.rank).length > 0;
+          setRankExists(rankExistsRef.current);
+          setIsComplete(isCompleteRef.current);
+        });
+      setTimeout(() => {
+        reFetchResultIfNoRank();
+      }, 3000);
     }
-  }, [latestRank]);
+  }
 
   return (
     <div className="flex items-center justify-between gap-4 p-4 pr-0 rounded-xl  border border-gray-200 shadow-md hover:shadow-lg transition-shadow duration-200 my-4">
@@ -48,11 +54,19 @@ const KeywordRow = ({ keyword, domain, results }) => {
 
       {/* this will show the graph and under it I want to show , for a particular day , the position is something */}
 
-      <div className="h-[64px] w-[300px] rounded-md shrink-0 flex items-center justify-center text-green-800 text-sm font-medium pr-0">
-        {!latestRank && <div>Checking Rank...</div>}
-        {latestRank && (
-          <div>
-            <Chart results={results} width={300}/>
+      <div className="h-[64px] w-[300px] rounded-md shrink-0 flex items-center justify-center text-white text-sm font-medium pr-0">
+        {!rankExists && (
+          <div className="block text-center w-full">
+            {isComplete === true ? (
+              <div>Not in top 100 :(</div>
+            ) : (
+              <div>Checking rank...</div>
+            )}
+          </div>
+        )}
+        {rankExists && (
+          <div className="pt-2">
+            <Chart results={resultsRef.current} width={300} />
           </div>
         )}
       </div>

@@ -898,3 +898,65 @@ POST /api/results 200 in 1859ms
   global_rank: 10
  }
 ]
+
+A cron job is basically a scheduled task that runs automatically at a fixed time, date, or interval on a server.
+
+   - Think of it like an alarm clock for your code.
+
+   - You tell the system:
+     “Run this script every day at 7 AM”
+
+   - Check this API every 5 minutes and and it’ll do it for you, without you touching anything.
+
+
+
+- Cron job ek aisa system hai jo background me fixed schedule pe automatically koi command ya script chalata hai.
+
+
+- Tumhe manually run karne ki zarurat nahi, wo apne aap chalega har bar schedule ke hisaab se.
+     
+
+      - Send email reminders every morning at 9 AM
+
+      - Auto-backup database daily at midnight
+
+      - Call an API every 5 minutes to update data
+
+      - Clean up logs once a week
+
+-----------------------------------------------
+
+
+1. System Cron Job (Linux Crontab)
+   
+   - This is the real/original cron that runs at the OS level.
+
+       - Where it runs: On your Linux server directly.
+
+
+       - How it works: You edit crontab and tell the OS to run a command/script at specific times.
+
+
+       - Independence: Works even if your app is stopped — because it’s managed by the system, not your app.
+
+
+       - Use case: Backup databases, restart services, clean up logs, or run scripts that aren’t tied to one app.
+
+
+2. App-Level Cron (e.g., node-cron)
+  
+   - This is a library inside your app that mimics cron behavior.
+
+      - Where it runs: Inside your Node.js process (or any language equivalent).
+
+
+      - How it works: You install a package like node-cron and write code to run tasks on a schedule.
+
+
+      - Dependence: Only runs if your Node app is up and running. If the server restarts and the app isn’t restarted, your cron job won’t run.
+
+
+      - Use case: App-specific tasks like sending emails, refreshing tokens, fetching API data.
+
+
+      

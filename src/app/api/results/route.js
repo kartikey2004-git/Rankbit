@@ -55,6 +55,8 @@ export async function POST(req) {
         result.link.includes(domain)
       )?.rank;
 
+      ourResultDoc.complete = true;
+
       // If rank is found, update the resultDoc with it and save the document
 
       if (rank) {
@@ -62,8 +64,8 @@ export async function POST(req) {
         console.log(
           `Rank ${rank} saved for keyword ${keyword} and domain ${domain}`
         );
-        await ourResultDoc.save();
       }
+      await ourResultDoc.save();
     } else {
       console.log("our result NOT found");
     }
@@ -94,11 +96,20 @@ export async function GET(req) {
     // Extract brightResponseId from searchParams
     const id = searchParams.get("id");
 
-    // Find the resultDoc in the database using the brightDataResId
+    const domain = searchParams.get("domain");
+    const keyword = searchParams.get("keyword");
 
-    const result = await Result.findOne({ brightDataResponseId: id });
+    if (id) {
+      // Find the resultDoc in the database using the brightDataResId
 
-    return Response.json(result);
+      const result = await Result.findOne({ brightDataResponseId: id });
+      return Response.json(result);
+    }
+
+    if (domain && keyword) {
+      const res = await Result.find({ domain, keyword });
+      return Response.json(res);
+    }
   } catch (error) {
     console.error("GET /results error:", error.message);
     return new Response(JSON.stringify({ error: "Error in getting results" }));

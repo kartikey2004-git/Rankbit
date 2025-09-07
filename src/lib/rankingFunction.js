@@ -90,7 +90,7 @@ import "dotenv/config";
 export async function doGoogleSearch(keyword) {
   const data = {
     country: "us",
-    query: { q: keyword },
+    query: { q: keyword, num: 100 },
     brd_json: "json", // JSON response enable
   };
 

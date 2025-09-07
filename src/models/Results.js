@@ -17,6 +17,10 @@ const resultSchema = new mongoose.Schema(
     rank: {
       type: String,
     },
+    complete: {
+      type: Boolean,
+      default: false
+    }
   },
   { timestamps: true }
 );

@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { Result } from "@/models/Results";
-import { doGoogleSearch } from "@/lib/rankingFunction";
+import { doGoogleSearch } from "@/lib/rankingFunction.js";
 
 export async function POST(req) {
   try {
