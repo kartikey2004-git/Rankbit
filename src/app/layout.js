@@ -41,21 +41,22 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}
       >
-        {/* If you’re not logged in, you won’t be able to see the children — instead, the login screen will appear. */}
-
+        {/* Not logged in → show landing/login screen */}
         {!session && <LoginScreen />}
 
-        {/* If you’re logged in, you’ll see the children (the app content).*/}
-
+        {/* Logged in → show the main app */}
         {session && (
-          <div className="min-h-screen bg-black px-4 py-8">
-            <div className="max-w-4xl mx-auto">
-              <Header />
-              {children}
-              <Toaster />
-            </div>
+          <div className="min-h-screen bg-black px-6 py-8">
+            {/* Header full width */}
+            <Header />
+
+            {/* App content area */}
+            <main className="max-w-7xl mx-auto w-full mt-8">{children}</main>
+
+            {/* Global toaster */}
+            <Toaster />
           </div>
         )}
       </body>

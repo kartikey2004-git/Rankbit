@@ -11,6 +11,7 @@ import Link from "next/link";
 import { BarLoader } from "react-spinners";
 import MySwal from "@/lib/swal.js";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 const page = () => {
   const [keywords, setKeywords] = useState([]); //state define for array of keywords
@@ -84,17 +85,17 @@ const page = () => {
   }, []);
 
   return (
-    <div className="mr-2 ml-2">
-      <div className="flex items-center justify-between">
+    <div className="px-6 py-8 w-full">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between  bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-md shadow-md">
         <div className="space-y-1">
           <Link
             href="/"
-            className="text-sm uppercase tracking-wider text-gray-400 block cursor-pointer"
+            className="text-sm uppercase tracking-wider text-gray-400  transition-colors"
           >
             Domains »
           </Link>
-
-          <h2 className="text-2xl font-semibold text-gray-200 leading-snug">
+          <h2 className="text-2xl font-semibold text-white leading-snug">
             {domain}
           </h2>
         </div>
@@ -102,28 +103,61 @@ const page = () => {
         <Button
           title="Delete domain"
           onClick={ShowDeleteDomainPopup}
-          className="flex items-center gap-2 bg-red-500 hover:bg-red-600 px-4 py-2 rounded-md transition"
+          className="mt-4 sm:mt-0 flex items-center gap-2 px-5 py-2 rounded-full bg-red-500 hover:bg-red-600 text-white font-medium transition-all duration-200"
         >
-          <HiOutlineTrash className="text-2xl" />
+          <HiOutlineTrash className="text-xl" />
           Delete
         </Button>
       </div>
 
-      <NewKeywordForm domain={domain} onNew={fetchKeywords} />
+      {/* Add Keyword Form */}
+      <div className="rounded-2xl p-5  hover:border-cyan-400/30 transition-all">
+        <h3 className="text-xl font-semibold text-white">
+          Add New Keyword
+        </h3>
+        <NewKeywordForm domain={domain} onNew={fetchKeywords} />
+      </div>
 
-      {loading ? (
-        <BarLoader className="mb-4" width={"100%"} color="#ffffff" />
-      ) : (
-        keywords.map((keywordObj) => (
-          <KeywordRow
-            key={keywordObj._id}
-            {...keywordObj}
-            results={results.filter((r) => r.keyword === keywordObj.keyword)}
-          />
-        ))
+      {/* Loader */}
+      {loading && (
+        <div className="mb-4">
+          <BarLoader width={"100%"} color="#ffffff" />
+        </div>
       )}
 
-      {!loading && !keywords?.length && <div>No Keywords found.</div>}
+      {/* Keyword List */}
+      {!loading && keywords.length > 0 && (
+        <motion.div
+          className="rounded-2xl divide-y divide-white/10 transition-all"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+        >
+          {keywords.map((keywordObj) => (
+            <motion.div
+              key={keywordObj._id}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05, duration: 0.3 }}
+              viewport={{ once: true }}
+            >
+              <KeywordRow
+                {...keywordObj}
+                results={results.filter(
+                  (r) => r.keyword === keywordObj.keyword
+                )}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
+
+      {/* Empty State */}
+      {!loading && keywords.length === 0 && (
+        <div className="text-center py-16 rounded-2xl  text-gray-400 text-sm">
+          No keywords found for this domain. Add one above to start tracking.
+        </div>
+      )}
     </div>
   );
 };

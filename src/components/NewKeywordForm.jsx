@@ -31,7 +31,7 @@ const NewKeywordForm = ({ onNew, domain }) => {
       <Input
         value={keyword}
         onChange={(e) => setKeyword(e.target.value)}
-        className="border px-4 py-4 text-lg rounded-lg grow focus:border-b focus-visible:ring-1 text-gray-100"
+        className="border px-4 py-4 text-lg rounded-lg grow border-zinc-800 focus:border-b focus-visible:ring-1 text-gray-100"
         type="text"
         placeholder="Add new KeyWord"
       />

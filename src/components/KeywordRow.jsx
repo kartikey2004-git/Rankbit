@@ -42,11 +42,11 @@ const KeywordRow = ({ keyword, domain, results: defaultResults }) => {
   }
 
   return (
-    <div className="flex items-center justify-between gap-4 p-4 pr-0 rounded-xl  border border-gray-200 shadow-md hover:shadow-lg transition-shadow duration-200 my-4">
+    <div className="flex items-center justify-between  rounded-xl   shadow-md hover:shadow-lg transition-shadow duration-200 my-4">
       <div className="flex flex-col">
         <Link
           href={"/domains/" + domain + "/" + encodeURIComponent(keyword)}
-          className="text-lg font-semibold text-gray-200 block"
+          className="text-lg font-semibold text-gray-200 block ml-7"
         >
           {keyword}
         </Link>

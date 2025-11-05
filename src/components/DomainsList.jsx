@@ -7,10 +7,6 @@ const DomainsList = ({ domains, keywords, results }) => {
   return (
     <div>
       <div className="space-y-1">
-        <h3 className="text-sm uppercase tracking-wider block text-gray-400">
-          Your Domains
-        </h3>
-
         <h2 className="text-2xl font-semibold text-gray-100 leading-snug">
           {domains.length + " Domains"}
         </h2>

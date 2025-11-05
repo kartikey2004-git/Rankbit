@@ -1,45 +1,60 @@
 import Link from "next/link";
 import React from "react";
 import Chart from "./Chart";
+import { motion } from "framer-motion";
 
 const DomainRow = ({ domain, icon, keywords, results }) => {
   return (
-    <div className="flex items-center justify-between gap-4 my-4 flex-col sm:flex-row border border-gray-300 rounded-xl p-4 shadow-md hover:shadow-xl transition-shadow duration-300 w-full max-w-3xl mx-auto">
-      <div className="flex items-start gap-3 flex-1">
-        {icon && <img src={icon} className="h-12" />}
+    <motion.div
+      whileHover={{ scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 w-full p-5 sm:p-6 my-4
+      bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md shadow-lg  transition-all duration-300"
+    >
+      {/* Left Section: Domain + Keywords */}
+      <div className="flex items-start gap-4 flex-1 w-full">
+        {icon && (
+          <img
+            src={icon}
+            alt={`${domain} icon`}
+            className="h-10 w-10 rounded-md object-contain flex-shrink-0"
+          />
+        )}
 
-        {/* when we click on particular domain , it redirects us to single domain page where all keywords listed for particular domain */}
-
-        <div>
+        <div className="flex-1">
+          {/* Domain Name */}
           <Link
-            className="text-lg font-semibold text-gray-100 block"
-            href={"/domains/" + domain}
+            href={`/domains/${domain}`}
+            className="text-lg sm:text-xl font-semibold text-white  transition-colors block"
           >
             {domain}
           </Link>
 
-          <div className="flex flex-wrap gap-2 mt-2">
-            {keywords.map((keywordDoc, i) => (
-              <>
+          {/* Keywords */}
+          <div className="flex flex-wrap gap-2 mt-3">
+            {keywords.length > 0 ? (
+              keywords.map((keywordDoc, i) => (
                 <Link
-                  href={"/domains/" + domain + "/" + keywordDoc.keyword}
                   key={i}
-                  className="shadow-lg
-        bg-black backdrop-blur-md border border-white/20 text-gray-200  px-2 py-1 rounded-md text-sm font-medium  transition-all duration-300 
-"
+                  href={`/domains/${domain}/${keywordDoc.keyword}`}
+                  className="px-3 py-1 text-sm font-normal text-gray-200 bg-white/5 border border-white/10 rounded-md 
+                  transition-all duration-300"
                 >
                   {keywordDoc.keyword}
                 </Link>
-              </>
-            ))}
+              ))
+            ) : (
+              <span className="text-gray-500 text-sm">No keywords yet</span>
+            )}
           </div>
         </div>
       </div>
 
-      <div>
+      {/* Right Section: Chart */}
+      <div className="w-full sm:w-[320px] mt-4 sm:mt-0">
         <Chart results={results} width={300} />
       </div>
-    </div>
+    </motion.div>
   );
 };
 

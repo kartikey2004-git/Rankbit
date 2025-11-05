@@ -11,19 +11,27 @@ const Header = async () => {
   const user = session?.user;
 
   return (
-    <header className="flex justify-between items-center mb-6">
-      <a href="/" className="text-3xl font-semibold text-white">
-        RankBit
-      </a>
-      <div className="flex items-center gap-3 border border-gray-200 px-4 py-2 rounded-full">
-        <img
-          src={user?.image}
-          alt="Profile image"
-          className="h-12 w-12 rounded-full object-cover"
-        />
-        <div className="leading-5">
-          <h3 className="text-white font-medium text-sm">{user?.name}</h3>
-          <LogoutLink />
+    <header className="w-full border-b border-white/10 backdrop-blur-md sticky top-0 z-40">
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-3">
+        {/* Logo */}
+        <a
+          href="/"
+          className="text-2xl sm:text-3xl font-semibold text-white tracking-tight"
+        >
+          Rank<span className="text-cyan-400">Bit</span>
+        </a>
+
+        {/* User Section */}
+        <div className="flex items-center gap-3 border border-white/10 bg-white/5 backdrop-blur-xl px-4 py-2 rounded-full hover:border-cyan-400/40 transition-all">
+          <img
+            src={user?.image}
+            alt="Profile image"
+            className="h-10 w-10 sm:h-12 sm:w-12 rounded-full object-cover"
+          />
+          <div className="leading-5">
+            <h3 className="text-white font-medium text-sm">{user?.name}</h3>
+            <LogoutLink />
+          </div>
         </div>
       </div>
     </header>

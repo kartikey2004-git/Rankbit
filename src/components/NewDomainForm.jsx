@@ -43,27 +43,30 @@ const NewDomainForm = ({ onNew }) => {
 
   return (
     <form
-      className="my-8 flex flex-col sm:flex-row gap-3 items-center w-full max-w-2xl mx-auto mt-6"
       onSubmit={handleSubmit}
+      className="mt-8 flex flex-col sm:flex-row items-center gap-4 w-full"
     >
+      {/* Domain Input */}
       <Input
         value={domain}
         onChange={handleChange}
-        className="
-        flex-1 px-4 py-3  placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 border  text-lg rounded-lg grow focus:border-b focus-visible:ring-1 text-gray-100"
-        pattern="^(?!https?:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$"
         type="text"
+        pattern="^(?!https?:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$"
         title="Enter a valid domain like example.com (without https://)"
-        placeholder="NewDomain.com"
+        placeholder="Enter domain (e.g., newdomain.com)"
+        className="flex-1 w-full px-5 py-3 text-base text-gray-100 placeholder-gray-500 
+      bg-white/5 border border-white/10 rounded-xl backdrop-blur-md 
+      focus:border-zinc-700 focus:ring-1 focus:ring-zinc-400 
+      outline-none transition-all duration-300"
       />
 
+      {/* Submit Button */}
       <Button
         type="submit"
-        className="px-8 py-4 font-semibold shadow-lg
-        bg-black backdrop-blur-md border border-white/20 text-gray-200 text-lg rounded-full transition-all duration-300 
-        hover:scale-[1.03] active:scale-[0.97]"
+        className="px-8 py-3 text-base font-semibold bg-transparent
+      text-white border-1 border-zinc-700 rounded-full shadow-lg hover:opacity-90 transition-all duration-300"
       >
-        Add
+        Add Domain
       </Button>
     </form>
   );

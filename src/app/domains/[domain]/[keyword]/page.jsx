@@ -9,6 +9,7 @@ import { HiOutlineTrash } from "react-icons/hi";
 import MySwal from "@/lib/swal.js";
 import { toast } from "sonner";
 import Chart from "@/components/Chart";
+import { motion } from "framer-motion";
 
 const page = () => {
   // useRouter is only for navigation (push, replace, back, etc)
@@ -82,34 +83,47 @@ const page = () => {
   };
 
   return (
-    <div className="ml-2 mr-2">
-      <div className="flex items-center justify-between mb-8">
+    <div className="px-6 py-8 w-full">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between  bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-md shadow-md">
         <div className="space-y-1">
           <Link
             href={`/domains/${domain}`}
-            className="text-sm tracking-wider text-gray-400 block cursor-pointer"
+            className="text-sm uppercase tracking-wider text-gray-400  transition-colors"
           >
             {domain} »
           </Link>
-
-          <h2 className="text-2xl font-semibold text-gray-200 leading-snug">
+          <h2 className="text-2xl font-semibold text-white leading-snug">
             {decodedKeyword}
           </h2>
         </div>
 
         <Button
-          title="Delete domain"
+          title="Delete keyword"
           onClick={ShowDeleteKeywordPopup}
-          className="flex items-center gap-2 bg-red-500 px-4 py-2 rounded-md transition hover:bg-red-600"
+          className="mt-4 sm:mt-0 flex items-center gap-2 px-5 py-2 rounded-full bg-red-500 hover:bg-red-600 text-white font-medium transition-all duration-200"
         >
-          <HiOutlineTrash className="text-2xl" />
+          <HiOutlineTrash className="text-xl" />
           Delete
         </Button>
       </div>
 
-      {results && (
-        <div>
+      {/* Chart Section */}
+      {results && results.length > 0 ? (
+        <motion.div
+          className="rounded-2xl p-6  shadow-md  transition-all"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h3 className="text-lg font-semibold text-white mb-4">
+            Keyword Performance
+          </h3>
           <Chart width={"100%"} results={results} />
+        </motion.div>
+      ) : (
+        <div className="text-center py-16  rounded-2xl backdrop-blur-md text-gray-400 text-sm">
+          No ranking data available yet for this keyword.
         </div>
       )}
     </div>
